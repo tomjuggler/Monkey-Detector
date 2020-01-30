@@ -17,10 +17,18 @@ import androidx.camera.core.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.Executors
 
+
+
 class MainActivity : AppCompatActivity() {
 
     private val API_KEY = "dcf6227d8ecf4968b4e1a1b5fc1c483b"
     private val executor = Executors.newSingleThreadExecutor()
+
+    //global vars idea from: https://stackoverflow.com/questions/52844343/kotlin-set-value-of-global-variable
+    companion object {
+
+        var monkey = "dog"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +90,11 @@ class MainActivity : AppCompatActivity() {
             version 1.1.0 or higher.
          */
         CameraX.bindToLifecycle(this, preview, imageAnalysis)
+//        Log.e("working?", "monkey working?")
+//        monkey = "monkey"
+//        if(monkey.compareTo("monkey") == 0){
+//            Log.e("MONKEYFFF", "monkey monkey monkey it works!")
+//        }
     }
 
     /* It allows us to define a custom class implementing the ImageAnalysis.Analyzer interface,
@@ -91,8 +104,15 @@ class MainActivity : AppCompatActivity() {
         var predictor: FritzVisionLabelPredictor? = null
         val TAG = javaClass.simpleName
 
-        override fun analyze(image: ImageProxy?, rotationDegrees: Int) {
 
+        override fun analyze(image: ImageProxy?, rotationDegrees: Int) {
+            Log.e("is it a monkey ?", monkey)
+//            monkey = "monkey"
+            if(monkey == "monkey "){
+                Log.e("MONKEYFFF", "monkey monkey monkeyYYY it works!")
+            } else{
+                Log.e("monkeysaysno", "no")
+            }
             //Handle all the ML logic here
             val mediaImage = image?.image
 
@@ -101,6 +121,8 @@ class MainActivity : AppCompatActivity() {
             val visionImage = FritzVisionImage.fromMediaImage(mediaImage, imageRotation)
 
             val managedModel = ImageLabelManagedModelFast()
+
+
 
             FritzVision.ImageLabeling.loadPredictor(
                 managedModel,
@@ -118,9 +140,17 @@ class MainActivity : AppCompatActivity() {
                     val sname = it.split(":")
                     Log.e(TAG, it)
                     Log.e(TAG, sname[0])
+                    Log.e(TAG, "checking for monkey...")
                     tv_name.text = sname[0]
+                    val mmm: String = sname[0] as String
+                    monkey = mmm
+//                    monkey = sname[0] as String
+//                    if(monkey.compareTo("monkey") == 0){
+//                        Log.e(TAG, "monkey monkey monkey it works!")
+//                    }
                 } ?: kotlin.run {
                     tv_name.visibility = TextView.INVISIBLE
+
                 }
             }
         }
