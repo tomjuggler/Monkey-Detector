@@ -7,6 +7,8 @@ import ai.fritz.vision.ImageRotation
 import ai.fritz.vision.PredictorStatusListener
 import ai.fritz.vision.imagelabeling.FritzVisionLabelPredictor
 import ai.fritz.vision.imagelabeling.ImageLabelManagedModelFast
+import android.app.PendingIntent.getActivity
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
@@ -28,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
 
         var monkey = "dog"
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -145,9 +148,14 @@ class MainActivity : AppCompatActivity() {
                     val mmm: String = sname[0] as String
                     monkey = mmm
 //                    monkey = sname[0] as String
-//                    if(monkey.compareTo("monkey") == 0){
-//                        Log.e(TAG, "monkey monkey monkey it works!")
-//                    }
+                    if(monkey.compareTo("monkey ") == 0){
+                        Log.e(TAG, "monkey monkey monkey it works!")
+                        tv_name.text = "MONKEYYYYYYYYYYSSSSSSSS!!!!!!!!!!!"
+                        var mediaPlayer: MediaPlayer? = MediaPlayer.create(applicationContext, R.raw.heyyou4)
+                        mediaPlayer?.start() // no need to call prepare(); create() does that for you
+//                        mediaPlayer?.stop()
+
+                    }
                 } ?: kotlin.run {
                     tv_name.visibility = TextView.INVISIBLE
 
