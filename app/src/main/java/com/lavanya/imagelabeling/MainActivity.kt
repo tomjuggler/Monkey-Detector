@@ -20,7 +20,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.Executors
 
 
-
 class MainActivity : AppCompatActivity() {
 
     private val API_KEY = "dcf6227d8ecf4968b4e1a1b5fc1c483b"
@@ -30,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
 
         var monkey = "dog"
+        var playing = false
 
     }
 
@@ -111,9 +111,9 @@ class MainActivity : AppCompatActivity() {
         override fun analyze(image: ImageProxy?, rotationDegrees: Int) {
             Log.e("is it a monkey ?", monkey)
 //            monkey = "monkey"
-            if(monkey == "monkey "){
+            if (monkey == "monkey ") {
                 Log.e("MONKEYFFF", "monkey monkey monkeyYYY it works!")
-            } else{
+            } else {
                 Log.e("monkeysaysno", "no")
             }
             //Handle all the ML logic here
@@ -148,11 +148,22 @@ class MainActivity : AppCompatActivity() {
                     val mmm: String = sname[0] as String
                     monkey = mmm
 //                    monkey = sname[0] as String
-                    if(monkey.compareTo("monkey ") == 0){
+                    if (monkey.compareTo("monkey ") == 0) {
                         Log.e(TAG, "monkey monkey monkey it works!")
                         tv_name.text = "MONKEYYYYYYYYYYSSSSSSSS!!!!!!!!!!!"
-                        var mediaPlayer: MediaPlayer? = MediaPlayer.create(applicationContext, R.raw.heyyou4)
-                        mediaPlayer?.start() // no need to call prepare(); create() does that for you
+                        //this plays only once at a time, although monkey is detected many times... works!
+                        if (!playing) {
+                            var mediaPlayer: MediaPlayer? =
+                                MediaPlayer.create(applicationContext, R.raw.heyyou4)
+                            //set playing to false on completion:
+                            mediaPlayer?.setOnCompletionListener {
+                                playing = false
+                            }
+                            //now playing - don't play again until complete:
+                            playing = true
+                            mediaPlayer?.start() // no need to call prepare(); create() does that for you
+                        }
+
 //                        mediaPlayer?.stop()
 
                     }
