@@ -9,6 +9,7 @@ import ai.fritz.vision.imagelabeling.FritzVisionLabelPredictor
 import ai.fritz.vision.imagelabeling.ImageLabelManagedModelFast
 import android.app.PendingIntent.getActivity
 import android.media.MediaPlayer
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
@@ -17,7 +18,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import kotlinx.android.synthetic.main.activity_main.*
+import java.net.URI
 import java.util.concurrent.Executors
+import khttp.get
+import java.net.HttpURLConnection
+import java.net.URL
 
 
 class MainActivity : AppCompatActivity() {
@@ -100,6 +105,88 @@ class MainActivity : AppCompatActivity() {
 //        }
     }
 
+    //asynctask to run http get:
+    // Create inner class by extending the AsyncTask
+    inner class MyAsyncTask2 : AsyncTask<String, Int, Int>() {
+        //Override the doInBackground method
+        override fun doInBackground(vararg params: String): Int {
+            val count: Int = params.size
+            var index = 0
+            while (index < count) {
+                Log.d(
+                    "Kotlin", "In doInBackground Method and Total parameter passed is :$count " +
+                            "and processing $index with value: ${params[index]}"
+                )
+//                 khttp.get from: https://www.kotlinresources.com/library/khttp/
+                val urlToGoTo = get("http://192.168.8.103/socketOff")
+                println(urlToGoTo.url)
+                println(get("http://192.168.8.103/socket1Off").text)
+
+                Thread.sleep(1000)
+                index++
+            }
+            return 1
+        }
+
+        // Override the onProgressUpdate method to post the update on main thread
+        override fun onProgressUpdate(vararg values: Int?) {
+            super.onProgressUpdate(*values)
+            Log.d("Kotlin", "On ProgressUpdate Method")
+        }
+        // Setup the intial UI before execution of the background task
+        override fun onPreExecute() {
+            super.onPreExecute()
+            Log.d("Kotlin", "On PreExecute Method")
+        }
+        // Update the final status by overriding the OnPostExecute method.
+        override fun onPostExecute(result: Int?) {
+            super.onPostExecute(result)
+            Log.d("Kotlin", "On Post Execute and size of String is:$result")
+        }
+    }
+
+    //asynctask to run http get:
+    // Create inner class by extending the AsyncTask
+    //I have no idea how to make this work for on and off, so 2x AsyncTasks....
+    inner class MyAsyncTask : AsyncTask<String, Int, Int>() {
+        //Override the doInBackground method
+        override fun doInBackground(vararg params: String): Int {
+            val count: Int = params.size
+            var index = 0
+            while (index < count) {
+                Log.d(
+                    "Kotlin", "In doInBackground Method and Total parameter passed is :$count " +
+                            "and processing $index with value: ${params[index]}"
+                )
+//                 khttp.get from: https://www.kotlinresources.com/library/khttp/
+                val urlToGoTo = get("http://192.168.8.103/socketOn")
+                println(urlToGoTo.url)
+                println(get("http://192.168.8.103/socket1On").text)
+
+                Thread.sleep(1000)
+                index++
+            }
+            return 1
+        }
+
+        // Override the onProgressUpdate method to post the update on main thread
+        override fun onProgressUpdate(vararg values: Int?) {
+            super.onProgressUpdate(*values)
+            Log.d("Kotlin", "On ProgressUpdate Method")
+        }
+        // Setup the intial UI before execution of the background task
+        override fun onPreExecute() {
+            super.onPreExecute()
+            Log.d("Kotlin", "On PreExecute Method")
+        }
+        // Update the final status by overriding the OnPostExecute method.
+        override fun onPostExecute(result: Int?) {
+            super.onPostExecute(result)
+            Log.d("Kotlin", "On Post Execute and size of String is:$result")
+        }
+    }
+
+
     /* It allows us to define a custom class implementing the ImageAnalysis.Analyzer interface,
        which will be called with incoming camera frames.
     */
@@ -145,7 +232,7 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, sname[0])
                     Log.e(TAG, "checking for monkey...")
                     tv_name.text = sname[0]
-                    val mmm: String = sname[0] as String
+                    val mmm: String = sname[0]
                     monkey = mmm
 //                    monkey = sname[0] as String
                     if (monkey.compareTo("monkey ") == 0) {
@@ -158,10 +245,32 @@ class MainActivity : AppCompatActivity() {
                             //set playing to false on completion:
                             mediaPlayer?.setOnCompletionListener {
                                 playing = false
+                                var task2: MyAsyncTask2 = MyAsyncTask2()
+                                task2.execute("http://192.168.8.103/socketOff")
+//                                val connection =
+//                                    URL("http://192.168.8.103/socketOff").openConnection() as HttpURLConnection
+//                                connection.connect()
+                                //khttp.get code not working:
+//                                val c = get("http://192.168.8.103/socket1Off")
+//                                println(c.url)
+//                                println(get("http://192.168.8.103/socket1Off").text)
                             }
                             //now playing - don't play again until complete:
                             playing = true
                             mediaPlayer?.start() // no need to call prepare(); create() does that for you
+                            //asynctask http get: - from https://medium.com/nplix/android-asynctask-example-in-kotlin-for-background-processing-of-task-59ed88d8c545
+                            // Declare the AsyncTask and start the execution
+                            var task: MyAsyncTask = MyAsyncTask()
+                            task.execute("http://192.168.8.103/socketOn")
+                            "http://192.168.8.103/socket1On"
+//                            val connection =
+//                                URL("http://192.168.8.103/socketOn").openConnection() as HttpURLConnection
+//                            connection.connect()
+                            // khttp.get from: https://www.kotlinresources.com/library/khttp/
+//                            val r = get("http://192.168.8.103/socket1On")
+//                            println(r.url)
+//                            println(get("http://192.168.8.103/socket1On").text)
+
                         }
 
 //                        mediaPlayer?.stop()

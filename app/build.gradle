@@ -32,6 +32,9 @@ android {
     }
     repositories {
         maven { url "https://fritz.mycloudrepo.io/public/repositories/android" }
+        jcenter { "http://jcenter.bintray.com" }
+        maven { url 'https://jitpack.io' }
+
     }
 }
 
@@ -49,4 +52,7 @@ dependencies {
     implementation "ai.fritz:vision:4.2.0"
     implementation "androidx.camera:camera-core:${camerax_version}"
     implementation "androidx.camera:camera-camera2:${camerax_version}"
+//    implementation "org.jetbrains.kotlin:khttp:1.0.0"
+    implementation "com.github.jkcclemens:khttp:-SNAPSHOT"
 }
+
