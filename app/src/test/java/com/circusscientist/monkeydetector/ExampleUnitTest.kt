@@ -1,4 +1,4 @@
-package com.lavanya.imagelabeling
+package com.circusscientist.monkeydetector
 
 import org.junit.Test
 
