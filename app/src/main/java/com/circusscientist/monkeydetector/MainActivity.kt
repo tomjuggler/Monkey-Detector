@@ -24,13 +24,13 @@ import khttp.get
 
 class MainActivity : AppCompatActivity() {
 
-    private val API_KEY = "f1cbcd01a45149ce91b581041e21b307"
+    private val API_KEY = "place_your_API_Key_here" //see circusscientist.com for details
     private val executor = Executors.newSingleThreadExecutor()
 
     //global vars idea from: https://stackoverflow.com/questions/52844343/kotlin-set-value-of-global-variable
     companion object {
 
-        var monkey = "dog"
+        var monkey = "dog" //could be anything here "dog" is just a placeholder
         var playing = false
 
     }
@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        //Wake Lock for screen:
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         /*In the MainActivity class, initialize Fritz SDK.
@@ -146,9 +147,7 @@ class MainActivity : AppCompatActivity() {
 
     //asynctask to run http get:
     // Create inner class by extending the AsyncTask
-    //I have no idea how to make this work for on and off, so 2x AsyncTasks....
-    //dam I made a mistake try again with urlToGoTo = get ("http://192.168.8.103/socket1On")
-    //used socketOn instead of socket1On !!!! damn
+    //I have no idea how to make this work for on and off, so 2x AsyncTasks, on and off....
     inner class MyAsyncTask : AsyncTask<String, Int, Int>() {
         //Override the doInBackground method
         override fun doInBackground(vararg params: String): Int {
@@ -163,7 +162,6 @@ class MainActivity : AppCompatActivity() {
                 val urlToGoTo = get("http://192.168.8.13/socket1On")
                 println(urlToGoTo.url)
                 println(get("http://192.168.8.13/socket1On").text)
-//              try println(get(params[index]).text // was passing socketOn wrong string....
                 Thread.sleep(1000)
                 index++
             }
@@ -248,13 +246,6 @@ class MainActivity : AppCompatActivity() {
                                 playing = false
                                 var task2: MyAsyncTask2 = MyAsyncTask2()
                                 task2.execute("http://192.168.8.13/socket1Off")
-//                                val connection =
-//                                    URL("http://192.168.8.103/socket1Off").openConnection() as HttpURLConnection
-//                                connection.connect()
-                                //khttp.get code not working:
-//                                val c = get("http://192.168.8.103/socket1Off")
-//                                println(c.url)
-//                                println(get("http://192.168.8.103/socket1Off").text)
                             }
                             //now playing - don't play again until complete:
                             playing = true
@@ -264,18 +255,7 @@ class MainActivity : AppCompatActivity() {
                             var task: MyAsyncTask = MyAsyncTask()
                             task.execute("http://192.168.8.13/socket1On")
                             "http://192.168.8.13/socket1On"
-//                            val connection =
-//                                URL("http://192.168.8.103/socketOn").openConnection() as HttpURLConnection
-//                            connection.connect()
-                            // khttp.get from: https://www.kotlinresources.com/library/khttp/
-//                            val r = get("http://192.168.8.103/socket1On")
-//                            println(r.url)
-//                            println(get("http://192.168.8.103/socket1On").text)
-
                         }
-
-//                        mediaPlayer?.stop()
-
                     }
                 } ?: kotlin.run {
                     tv_name.visibility = TextView.INVISIBLE
