@@ -2,6 +2,9 @@
 
 The monkey detector is adapted from the fritz.ai example detailed below. See https://circusscientist.com for details on how to set this up. The code will not run without an api key, get yours for free from https://www.fritz.ai
 
+Check out the standalone version with loud siren on Google Play Store:
+https://play.google.com/store/apps/details?id=com.circusscientist.monkeydetector
+
 Image-Labeling Using Fritz SDK: 
 
 With the Image Labeling feature, you can identify the contents of an image or each frame of live video. Each prediction returns a set of labels as well as a confidence score for each label. Image Labeling can recognize people, places, and things.
