@@ -1,12 +1,15 @@
 package com.circusscientist.monkeydetector
 
 import ai.fritz.core.Fritz
+import ai.fritz.labelmodelfast.ImageLabelOnDeviceModelFast
 import ai.fritz.vision.FritzVision
 import ai.fritz.vision.FritzVisionImage
 import ai.fritz.vision.ImageRotation
 import ai.fritz.vision.PredictorStatusListener
 import ai.fritz.vision.imagelabeling.FritzVisionLabelPredictor
 import ai.fritz.vision.imagelabeling.ImageLabelManagedModelFast
+import android.Manifest
+import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.os.AsyncTask
 import android.os.Bundle
@@ -17,6 +20,8 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.Executors
 import khttp.get
@@ -26,30 +31,107 @@ class MainActivity : AppCompatActivity() {
 
     private val API_KEY = "place_your_API_Key_here" //see circusscientist.com for details
     private val executor = Executors.newSingleThreadExecutor()
-
+    private var MY_PERMISSIONS_REQUEST_CAMERA = 1
+    private lateinit var mp: MediaPlayer
     //global vars idea from: https://stackoverflow.com/questions/52844343/kotlin-set-value-of-global-variable
     companion object {
 
         var monkey = "dog" //could be anything here "dog" is just a placeholder
         var playing = false
+        var teddy_bear = "teddy_bear "
 
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        //Wake Lock for screen:
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        //moved all startup code to after permissions granted below
+        //but app still doesn't work on first run correctly...
 
-        /*In the MainActivity class, initialize Fritz SDK.
-        */
-        Fritz.configure(this, API_KEY)
+        //check camera permissions
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
 
-        /*Instead of calling `startCamera()` on the main thread, we use `viewFinder.post { ... }`
-         to make sure that `viewFinder` has already been inflated into the view when `startCamera()` is called.
-         */
-        view_finder.post {
-            startCamera()
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    Manifest.permission.CAMERA
+                )
+            ) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.CAMERA),
+                    MY_PERMISSIONS_REQUEST_CAMERA
+                )
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            // Permission has already been granted
+            setContentView(R.layout.activity_main)
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+            /*In the MainActivity class, initialize Fritz SDK.
+            */
+            Fritz.configure(this, API_KEY)
+
+            /*Instead of calling `startCamera()` on the main thread, we use `viewFinder.post { ... }`
+             to make sure that `viewFinder` has already been inflated into the view when `startCamera()` is called.
+             */
+            view_finder.post {
+                startCamera()
+            }
+        }
+        mp = MediaPlayer.create(applicationContext, R.raw.heyyou4)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            MY_PERMISSIONS_REQUEST_CAMERA -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    setContentView(R.layout.activity_main)
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+                    /*In the MainActivity class, initialize Fritz SDK.
+                    */
+                    Fritz.configure(this, API_KEY)
+
+                    /*Instead of calling `startCamera()` on the main thread, we use `viewFinder.post { ... }`
+                     to make sure that `viewFinder` has already been inflated into the view when `startCamera()` is called.
+                     */
+                    view_finder.post {
+                        startCamera()
+                    }
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return
+            }
+
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                // Ignore all other requests.
+            }
         }
     }
 
@@ -209,18 +291,24 @@ class MainActivity : AppCompatActivity() {
 
             val visionImage = FritzVisionImage.fromMediaImage(mediaImage, imageRotation)
 
-            val managedModel = ImageLabelManagedModelFast()
 
 
+            //FritzOnDeviceModel
+            val imageLabelOnDeviceModel =  ImageLabelOnDeviceModelFast() //FritzVisionLabelPredictor
+            val predictor = FritzVision.ImageLabeling.getPredictor(imageLabelOnDeviceModel)
 
-            FritzVision.ImageLabeling.loadPredictor(
-                managedModel,
-                object : PredictorStatusListener<FritzVisionLabelPredictor> {
-                    override fun onPredictorReady(p0: FritzVisionLabelPredictor?) {
-                        Log.d(TAG, "Image Labeling predictor is ready")
-                        predictor = p0
-                    }
-                })
+//below is to load model at runtime. smaller apk but fritz.ai don't want me to do it 10 000 times!:
+
+//            val managedModel = ImageLabelManagedModelFast() //for load model at runtime
+
+//            FritzVision.ImageLabeling.loadPredictor(
+//                managedModel,
+//                object : PredictorStatusListener<FritzVisionLabelPredictor> {
+//                    override fun onPredictorReady(p0: FritzVisionLabelPredictor?) {
+//                        Log.d(TAG, "Image Labeling predictor is ready")
+//                        predictor = p0
+//                    }
+//                })
 
             val labelResult = predictor?.predict(visionImage)
 
@@ -239,23 +327,25 @@ class MainActivity : AppCompatActivity() {
                         tv_name.text = "MONKEYYYYYYYYYYSSSSSSSS!!!!!!!!!!!"
                         //this plays only once at a time, although monkey is detected many times... works!
                         if (!playing) {
-                            var mediaPlayer: MediaPlayer? =
-                                MediaPlayer.create(applicationContext, R.raw.heyyou4)
-                            //set playing to false on completion:
-                            mediaPlayer?.setOnCompletionListener {
+                            //now initialising onCreate!
+//                            val mediaPlayer: MediaPlayer? =
+//                                MediaPlayer.create(applicationContext, R.raw.siren)
+//                            //set playing to false on completion:
+                            mp?.setOnCompletionListener {
                                 playing = false
                                 var task2: MyAsyncTask2 = MyAsyncTask2()
                                 task2.execute("http://192.168.8.13/socket1Off")
                             }
                             //now playing - don't play again until complete:
                             playing = true
-                            mediaPlayer?.start() // no need to call prepare(); create() does that for you
-                            //asynctask http get: - from https://medium.com/nplix/android-asynctask-example-in-kotlin-for-background-processing-of-task-59ed88d8c545
+                            mp?.start() // no need to call prepare(); create() does that for you                            //asynctask http get: - from https://medium.com/nplix/android-asynctask-example-in-kotlin-for-background-processing-of-task-59ed88d8c545
                             // Declare the AsyncTask and start the execution
                             var task: MyAsyncTask = MyAsyncTask()
                             task.execute("http://192.168.8.13/socket1On")
                             "http://192.168.8.13/socket1On"
                         }
+//                        mediaPlayer?.stop()
+
                     }
                 } ?: kotlin.run {
                     tv_name.visibility = TextView.INVISIBLE
